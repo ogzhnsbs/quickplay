@@ -1,0 +1,21 @@
+{
+  "name": "chrome-video-speeder",
+  "version": "1.0.0",
+  "description": "Chrome extension that speeds up all video content with hover-activated controls",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "happy-dom": "^20.10.6",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0",
+    "vite-plugin-chrome-extension": "^0.0.7",
+    "vitest": "^4.1.9"
+  }
+}

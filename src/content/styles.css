@@ -1,0 +1,116 @@
+#video-speeder-overlay {
+  position: fixed;
+  display: none;
+  z-index: 2147483647;
+  background: rgba(15, 15, 25, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 6px 8px;
+  gap: 6px;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  pointer-events: auto;
+}
+
+#video-speeder-overlay.vs-flex {
+  display: flex;
+}
+
+/* ── Dropdown ── */
+
+.vs-dropdown-wrap {
+  position: relative;
+}
+
+.vs-dropdown-trigger {
+  background: #4a6cf7;
+  color: #fff;
+  border: 1px solid #4a6cf7;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+}
+
+.vs-dropdown-trigger:hover {
+  background: #3b5de6;
+}
+
+.vs-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(15, 15, 25, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  min-width: 70px;
+}
+
+.vs-dropdown-hidden {
+  display: none;
+}
+
+.vs-dropdown-item {
+  background: transparent;
+  color: #ccc;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s ease;
+  white-space: nowrap;
+}
+
+.vs-dropdown-item:hover {
+  background: rgba(100, 140, 255, 0.2);
+  color: #fff;
+}
+
+.vs-dropdown-item.vs-active {
+  color: #4a6cf7;
+  background: rgba(74, 108, 247, 0.15);
+}
+
+/* ── Divider ── */
+
+.vs-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 2px;
+}
+
+/* ── Skip to end ── */
+
+.vs-skip-btn {
+  background: rgba(255, 180, 50, 0.15);
+  color: #ffb432;
+  border: 1px solid rgba(255, 180, 50, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.vs-skip-btn:hover {
+  background: rgba(255, 180, 50, 0.3);
+  color: #ffd080;
+  border-color: rgba(255, 180, 50, 0.6);
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Speeder</title>
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <div class="popup-container">
+      <div class="popup-header">
+        <h1 class="popup-title">⚡ Video Speeder</h1>
+        <div class="toggle-group toggle-group--header">
+          <label class="toggle-switch toggle-switch--compact">
+            <input type="checkbox" id="enabled-toggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label" for="speed-select">
+          Default Speed
+        </label>
+        <select id="speed-select" class="setting-select">
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1">1x (Normal)</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="1.75">1.75x</option>
+          <option value="2">2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <button id="skip-now" class="setting-select action-button" type="button">Skip current playing video</button>
+      </div>
+
+      <div class="popup-footer">
+        <span class="footer-text">Hover over any video to control speed</span>
+      </div>
+    </div>
+
+    <script type="module" src="./popup.ts"></script>
+  </body>
+</html>
