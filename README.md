@@ -26,6 +26,22 @@ npm run build && cd dist && zip -r ../quickplay.zip . && cd ..
 
 Creates `quickplay.zip` in the project root from the `dist/` build output.
 
+## Privacy Policy (GitHub Pages)
+
+Privacy policy files live in `docs/` for GitHub Pages.
+
+1. Push the repo to GitHub
+2. Open **Settings → Pages**
+3. Set **Source** to **Deploy from a branch**
+4. Choose **main** branch and **/docs** folder
+5. Save
+
+After deployment, use this URL in the Chrome Web Store:
+
+```
+https://ogzhnsbs.github.io/quickplay/privacy-policy.html
+```
+
 ## Install from dist/
 
 1. Open `chrome://extensions/`
