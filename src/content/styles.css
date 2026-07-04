@@ -11,12 +11,68 @@
   gap: 6px;
   align-items: center;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   pointer-events: auto;
 }
 
 #video-speeder-overlay.vs-flex {
   display: flex;
+}
+
+#video-speeder-feedback-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2147483649;
+  isolation: isolate;
+  background: transparent;
+}
+
+.vs-speed-feedback {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  transform: translate(0, 0) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffb347, #ff7b00);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 28px rgba(255, 123, 0, 0.35);
+  will-change: transform, opacity;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.vs-speed-feedback--visible {
+  animation: vs-speed-feedback-pop 0.7s ease forwards;
+}
+
+@keyframes vs-speed-feedback-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.16) translateY(-20px);
+  }
 }
 
 /* ── Dropdown ── */

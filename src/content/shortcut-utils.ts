@@ -21,8 +21,8 @@ export function resetSpeedForShortcut(): number {
   return 1;
 }
 
-export function getSpeedShortcutDirection(key: string): 'increase' | 'decrease' | null {
-  const normalizedKey = key.toLowerCase();
+export function getSpeedShortcutDirection(key: string | undefined): 'increase' | 'decrease' | null {
+  const normalizedKey = (key ?? '').toLowerCase();
 
   if (normalizedKey === ']' || normalizedKey === '}') {
     return 'increase';
@@ -36,7 +36,7 @@ export function getSpeedShortcutDirection(key: string): 'increase' | 'decrease' 
 }
 
 export function isShortcutEvent(event: Pick<KeyboardEvent, 'key' | 'code' | 'shiftKey' | 'ctrlKey' | 'metaKey' | 'altKey'>): boolean {
-  const key = event.key.toLowerCase();
+  const key = (event.key ?? '').toLowerCase();
   const hasCommandModifier = event.ctrlKey || event.metaKey;
 
   if (key === 'e' && hasCommandModifier && event.shiftKey && !event.altKey) {

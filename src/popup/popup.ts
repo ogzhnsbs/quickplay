@@ -1,5 +1,6 @@
 import type { ExtensionSettings } from "@/types";
-import { DEFAULT_SETTINGS, SPEED_OPTIONS } from "@/types";
+import { DEFAULT_SETTINGS } from "@/types";
+import { populateSpeedSelect } from "./speed-options";
 
 const speedSelect = document.getElementById(
   "speed-select",
@@ -13,7 +14,7 @@ let currentSettings: ExtensionSettings;
 
 function syncSettings(settings: ExtensionSettings): void {
   currentSettings = { ...DEFAULT_SETTINGS, ...settings };
-  speedSelect.value = String(currentSettings.defaultSpeed);
+  populateSpeedSelect(speedSelect, currentSettings.defaultSpeed);
   enabledToggle.checked = currentSettings.enabled;
 }
 

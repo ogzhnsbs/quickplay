@@ -41,6 +41,30 @@ chrome.runtime.onMessage.addListener(
       return true;
     }
 
+    if (message.type === "APPLY_PLAYBACK_RATE" && typeof message.payload === "number") {
+      const speed = message.payload;
+      getSettings().then((current) => {
+        const nextSettings: ExtensionSettings = {
+          ...current,
+          defaultSpeed: speed as ExtensionSettings["defaultSpeed"],
+        };
+        saveSettings(nextSettings)
+          .then(() => {
+            broadcastSettings(nextSettings);
+            chrome.tabs.query({}, (tabs) => {
+              tabs.forEach((tab) => {
+                if (tab.id) {
+                  chrome.tabs.sendMessage(tab.id, { type: "SETTINGS_UPDATED", payload: nextSettings }).catch(() => undefined);
+                }
+              });
+            });
+            sendResponse({ success: true });
+          })
+          .catch(() => sendResponse({ success: false }));
+      });
+      return true;
+    }
+
     if (message.type === "SKIP_FIRST_PLAYING_VIDEO") {
       chrome.tabs.query({}, (tabs) => {
         tabs.forEach((tab) => {

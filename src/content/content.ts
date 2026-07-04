@@ -12,7 +12,7 @@ import { adjustSpeedForShortcut, getSpeedShortcutDirection, isShortcutEvent } fr
 function handleKeyboardShortcuts(event: KeyboardEvent): void {
   if (!isShortcutEvent(event)) return;
 
-  const key = event.key.toLowerCase();
+  const key = (event.key ?? '').toLowerCase();
 
   if (key === "e") {
     event.preventDefault();
@@ -36,6 +36,7 @@ function handleKeyboardShortcuts(event: KeyboardEvent): void {
     const nextSpeed = 1;
     setActiveSpeed(nextSpeed);
     applySpeedToAll(nextSpeed);
+    void chrome.runtime.sendMessage({ type: "APPLY_PLAYBACK_RATE", payload: nextSpeed });
     return;
   }
 
@@ -45,6 +46,7 @@ function handleKeyboardShortcuts(event: KeyboardEvent): void {
     const nextSpeed = adjustSpeedForShortcut(getActiveSpeed(), speedDirection);
     setActiveSpeed(nextSpeed);
     applySpeedToAll(nextSpeed);
+    void chrome.runtime.sendMessage({ type: "APPLY_PLAYBACK_RATE", payload: nextSpeed });
   }
 }
 
@@ -95,8 +97,8 @@ async function init(): Promise<void> {
     return;
   }
 
-  // Sync overlay activeSpeed with saved settings
-  setActiveSpeed(settings.defaultSpeed);
+  // Sync overlay activeSpeed with saved settings without showing the initial feedback
+  setActiveSpeed(settings.defaultSpeed, false);
 
   const onVideoHover = initOverlay(settings, () => {});
 

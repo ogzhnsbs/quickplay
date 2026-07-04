@@ -1,6 +1,7 @@
 import { SPEED_OPTIONS } from "@/types";
 import type { ExtensionSettings } from "@/types";
 import { getHoverTarget, applySpeed, applySpeedToAll, skipFirstPlayingVideo } from "./video-manager";
+import { createSpeedFeedbackElement } from "./speed-feedback";
 
 let currentVideo: HTMLVideoElement | null = null;
 let overlayEl: HTMLDivElement | null = null;
@@ -9,18 +10,64 @@ let dropdownOpen = false;
 let onSpeedChangedGlobal: ((speed: number) => void) | null = null;
 const videoHoverHandlers = new Map<HTMLVideoElement, () => void>();
 let scrollRAFId: number | null = null;
+let feedbackTimeoutId: number | null = null;
+let feedbackEnabled = false;
+let feedbackEl: HTMLDivElement | null = null;
 
 export function getActiveSpeed(): number {
   return activeSpeed;
 }
 
-export function setActiveSpeed(speed: number): void {
+function showSpeedFeedback(speed: number): void {
+  if (feedbackTimeoutId !== null) {
+    window.clearTimeout(feedbackTimeoutId);
+  }
+
+  let container = document.getElementById("video-speeder-feedback-root");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "video-speeder-feedback-root";
+    document.documentElement.appendChild(container);
+  }
+
+  if (!feedbackEl) {
+    feedbackEl = createSpeedFeedbackElement(speed);
+    container.appendChild(feedbackEl);
+  }
+
+  feedbackEl.textContent = `${speed}x`;
+  feedbackEl.classList.remove("vs-speed-feedback--visible");
+  feedbackEl.style.opacity = "0";
+  feedbackEl.style.transform = "translate(0, 0) scale(0.8)";
+  feedbackEl.style.removeProperty("display");
+  container.appendChild(feedbackEl);
+
+  requestAnimationFrame(() => {
+    feedbackEl?.classList.add("vs-speed-feedback--visible");
+  });
+
+  feedbackTimeoutId = window.setTimeout(() => {
+    feedbackEl?.classList.remove("vs-speed-feedback--visible");
+    feedbackTimeoutId = window.setTimeout(() => {
+      if (feedbackEl) {
+        feedbackEl.style.opacity = "0";
+      }
+      feedbackTimeoutId = null;
+    }, 220);
+  }, 700);
+}
+
+export function setActiveSpeed(speed: number, showFeedback = true): void {
   if (activeSpeed === speed) return;
 
   activeSpeed = speed;
   if (overlayEl && overlayEl.classList.contains("vs-flex") && currentVideo) {
     renderOverlay();
     positionOverlay();
+  }
+
+  if (showFeedback && feedbackEnabled) {
+    showSpeedFeedback(speed);
   }
 }
 
@@ -66,6 +113,8 @@ function renderOverlay(): void {
   const trigger = document.createElement("button");
   trigger.type = "button";
   trigger.className = "vs-dropdown-trigger";
+  trigger.style.width = "72px";
+  trigger.style.justifyContent = "center";
   trigger.innerHTML = `${activeSpeed}x &#9662;`;
 
   // Dropdown list
@@ -89,6 +138,7 @@ function renderOverlay(): void {
       renderOverlay();
       dropdownOpen = false;
       positionOverlay();
+      showSpeedFeedback(s);
     });
 
     dropdown.appendChild(btn);
@@ -180,6 +230,7 @@ export function initOverlay(
 
   overlayEl = createOverlay();
   document.documentElement.appendChild(overlayEl);
+  feedbackEnabled = true;
 
   // ── Scroll / resize tracking ──
   window.addEventListener("scroll", scheduleReposition, true);
