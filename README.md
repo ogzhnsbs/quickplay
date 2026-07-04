@@ -18,6 +18,14 @@ npm run dev      # Development mode with hot reload
 npm run build    # Production build → dist/
 ```
 
+## Package for Chrome Web Store
+
+```bash
+npm run build && cd dist && zip -r ../quickplay.zip . && cd ..
+```
+
+Creates `quickplay.zip` in the project root from the `dist/` build output.
+
 ## Install from dist/
 
 1. Open `chrome://extensions/`
