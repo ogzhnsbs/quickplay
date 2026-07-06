@@ -5,21 +5,42 @@ import {
   applySpeedToAll,
   applySpeed,
   skipFirstPlayingVideo,
+  hasVideos,
 } from "./video-manager";
 import { initOverlay, getActiveSpeed, setActiveSpeed } from "./overlay";
-import { adjustSpeedForShortcut, getSpeedShortcutDirection, isShortcutEvent } from "./shortcut-utils";
+import {
+  adjustSpeedForShortcut,
+  getSpeedShortcutDirection,
+  isEditableTarget,
+  isShortcutEvent,
+} from "./shortcut-utils";
+
+let interactiveFeaturesInitialized = false;
+let onVideoHover: ((video: HTMLVideoElement) => void) | null = null;
+let currentSettings: ExtensionSettings = DEFAULT_SETTINGS;
+
+function ensureInteractiveFeatures(): void {
+  if (interactiveFeaturesInitialized) return;
+
+  interactiveFeaturesInitialized = true;
+  setActiveSpeed(currentSettings.defaultSpeed, false);
+  onVideoHover = initOverlay(currentSettings, () => {});
+  window.addEventListener("keydown", handleKeyboardShortcuts, true);
+}
 
 function handleKeyboardShortcuts(event: KeyboardEvent): void {
   if (!isShortcutEvent(event)) return;
+  if (isEditableTarget(event)) return;
+  if (!hasVideos()) return;
 
-  const key = (event.key ?? '').toLowerCase();
+  const key = (event.key ?? "").toLowerCase();
 
   if (key === "e") {
     event.preventDefault();
     void chrome.storage.sync.get("settings").then((result) => {
-      const currentSettings = { ...DEFAULT_SETTINGS, ...(result.settings as ExtensionSettings) };
-      const nextEnabled = !currentSettings.enabled;
-      const updatedSettings = { ...currentSettings, enabled: nextEnabled };
+      const settings = { ...DEFAULT_SETTINGS, ...(result.settings as ExtensionSettings) };
+      const nextEnabled = !settings.enabled;
+      const updatedSettings = { ...settings, enabled: nextEnabled };
       void chrome.storage.sync.set({ settings: updatedSettings });
     });
     return;
@@ -50,6 +71,15 @@ function handleKeyboardShortcuts(event: KeyboardEvent): void {
   }
 }
 
+function applySettingsUpdate(settings: ExtensionSettings, shouldApplySpeed: boolean): void {
+  const previousSpeed = getActiveSpeed();
+  setActiveSpeed(settings.defaultSpeed, false);
+
+  if (shouldApplySpeed && settings.enabled && previousSpeed !== settings.defaultSpeed) {
+    applySpeedToAll(settings.defaultSpeed);
+  }
+}
+
 async function loadSettings(): Promise<ExtensionSettings> {
   try {
     const result = await chrome.storage.sync.get("settings");
@@ -62,7 +92,7 @@ async function loadSettings(): Promise<ExtensionSettings> {
 chrome.runtime.onMessage.addListener(
   (message: { type?: string; payload?: unknown }, _sender, sendResponse) => {
     if (message?.type === "APPLY_PLAYBACK_RATE" && typeof message.payload === "number") {
-      setActiveSpeed(message.payload);
+      setActiveSpeed(message.payload, false);
       applySpeedToAll(message.payload);
       sendResponse({ success: true });
       return true;
@@ -77,9 +107,10 @@ chrome.runtime.onMessage.addListener(
     if (message?.type === "SETTINGS_UPDATED") {
       const settings = message.payload as ExtensionSettings | undefined;
       if (settings) {
-        setActiveSpeed(settings.defaultSpeed);
-        if (settings.enabled) {
-          applySpeedToAll(settings.defaultSpeed);
+        currentSettings = { ...DEFAULT_SETTINGS, ...settings };
+        if (hasVideos()) {
+          ensureInteractiveFeatures();
+          applySettingsUpdate(currentSettings, true);
         }
       }
       sendResponse({ success: true });
@@ -91,49 +122,51 @@ chrome.runtime.onMessage.addListener(
 );
 
 async function init(): Promise<void> {
-  const settings = await loadSettings();
+  currentSettings = await loadSettings();
 
-  if (!settings.enabled) {
+  if (!currentSettings.enabled) {
     return;
   }
 
-  // Sync overlay activeSpeed with saved settings without showing the initial feedback
-  setActiveSpeed(settings.defaultSpeed, false);
-
-  const onVideoHover = initOverlay(settings, () => {});
-
-  // Track videos we've already registered hover handlers for
   const registeredVideos = new Set<HTMLVideoElement>();
 
   initVideoObserver(
     (videos) => {
-      const currentSpeed = getActiveSpeed();
-      for (const v of videos) {
-        applySpeed(v, currentSpeed);
-        if (!registeredVideos.has(v)) {
-          registeredVideos.add(v);
-          onVideoHover(v);
+      if (videos.length === 0) return;
+
+      ensureInteractiveFeatures();
+
+      const speed = getActiveSpeed();
+      for (const video of videos) {
+        applySpeed(video, speed);
+        if (onVideoHover && !registeredVideos.has(video)) {
+          registeredVideos.add(video);
+          onVideoHover(video);
         }
       }
     },
-    getActiveSpeed,
+    () => (interactiveFeaturesInitialized ? getActiveSpeed() : currentSettings.defaultSpeed),
   );
 
-  applySpeedToAll(getActiveSpeed());
+  if (hasVideos()) {
+    ensureInteractiveFeatures();
+    applySpeedToAll(getActiveSpeed());
+  }
 
-  window.addEventListener("keydown", handleKeyboardShortcuts, true);
-
-  // React to setting changes from popup OR overlay speed button clicks
   chrome.storage.onChanged.addListener((changes) => {
-    if (changes.settings) {
-      const newSettings = changes.settings.newValue as ExtensionSettings;
-      if (newSettings && newSettings.defaultSpeed !== undefined) {
-        setActiveSpeed(newSettings.defaultSpeed);
-        if (newSettings.enabled) {
-          applySpeedToAll(newSettings.defaultSpeed);
-        }
-      }
-    }
+    if (!changes.settings) return;
+
+    const newSettings = changes.settings.newValue as ExtensionSettings | undefined;
+    const oldSettings = changes.settings.oldValue as ExtensionSettings | undefined;
+    if (!newSettings) return;
+
+    currentSettings = { ...DEFAULT_SETTINGS, ...newSettings };
+
+    if (oldSettings?.defaultSpeed === newSettings.defaultSpeed) return;
+    if (!hasVideos()) return;
+
+    ensureInteractiveFeatures();
+    applySettingsUpdate(currentSettings, true);
   });
 }
 

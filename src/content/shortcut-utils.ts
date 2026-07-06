@@ -35,6 +35,23 @@ export function getSpeedShortcutDirection(key: string | undefined): 'increase' |
   return null;
 }
 
+export function isEditableTarget(event: Pick<KeyboardEvent, 'target' | 'composedPath'>): boolean {
+  const path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
+
+  for (const node of path) {
+    if (!(node instanceof HTMLElement)) continue;
+
+    if (node.isContentEditable) return true;
+
+    const tagName = node.tagName;
+    if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function isShortcutEvent(event: Pick<KeyboardEvent, 'key' | 'code' | 'shiftKey' | 'ctrlKey' | 'metaKey' | 'altKey'>): boolean {
   const key = (event.key ?? '').toLowerCase();
   const hasCommandModifier = event.ctrlKey || event.metaKey;

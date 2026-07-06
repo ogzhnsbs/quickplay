@@ -22,6 +22,30 @@ export function skipFirstPlayingVideo(): void {
  * This mirrors the pattern from the original video-custom-playback-rate project
  * and is the key to supporting Twitter/X where videos live in same-origin iframes.
  */
+export function hasVideos(doc: Document = document): boolean {
+  try {
+    if (doc.getElementsByTagName('video').length > 0) {
+      return true;
+    }
+
+    const iframes = doc.getElementsByTagName('iframe');
+    for (let i = 0; i < iframes.length; i++) {
+      try {
+        const innerDoc = iframes[i].contentDocument || iframes[i].contentWindow?.document;
+        if (innerDoc && hasVideos(innerDoc)) {
+          return true;
+        }
+      } catch {
+        // cross-origin iframe — silently skip
+      }
+    }
+  } catch {
+    // document access failed — skip
+  }
+
+  return false;
+}
+
 function recursiveFindVideos(handler: (video: HTMLVideoElement) => void, doc: Document = document): void {
   try {
     const videos = doc.getElementsByTagName('video');
@@ -125,13 +149,12 @@ export function initVideoObserver(onVideosFound: (videos: HTMLVideoElement[]) =>
     const currentSpeed = activeSpeed();
 
     recursiveFindVideos((v) => {
-      applySpeed(v, currentSpeed);
       if (!seenVideos.has(v)) {
         seenVideos.add(v);
         newVideos.push(v);
+        applySpeed(v, currentSpeed);
+        v.addEventListener('loadedmetadata', () => applySpeed(v, currentSpeed), { once: true });
       }
-
-      v.addEventListener('loadedmetadata', () => applySpeed(v, currentSpeed), { once: true });
     });
 
     return newVideos;

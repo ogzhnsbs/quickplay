@@ -77,7 +77,6 @@ export function setActiveSpeed(speed: number, showFeedback = true): void {
  */
 async function persistSpeed(speed: number): Promise<void> {
   try {
-    // Read current settings, update speed, write back
     const result = await chrome.storage.sync.get("settings");
     const current = result.settings as ExtensionSettings | undefined;
     const updated = {

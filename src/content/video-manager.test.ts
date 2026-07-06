@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { initVideoObserver, applySpeedToAll, applySpeed, getHoverTargets, skipFirstPlayingVideo } from './video-manager';
-import { adjustSpeedForShortcut, getSpeedShortcutDirection, isShortcutEvent, resetSpeedForShortcut } from './shortcut-utils';
+import { initVideoObserver, applySpeedToAll, applySpeed, getHoverTargets, skipFirstPlayingVideo, hasVideos } from './video-manager';
+import { adjustSpeedForShortcut, getSpeedShortcutDirection, isEditableTarget, isShortcutEvent, resetSpeedForShortcut } from './shortcut-utils';
 
 describe('video manager', () => {
   beforeEach(() => {
@@ -140,5 +140,31 @@ describe('video manager', () => {
     expect(isShortcutEvent({ key: ']', code: 'BracketRight', shiftKey: true, ctrlKey: false, metaKey: false, altKey: false })).toBe(true);
     expect(isShortcutEvent({ key: '[', code: 'BracketLeft', shiftKey: true, ctrlKey: false, metaKey: false, altKey: false })).toBe(true);
     expect(isShortcutEvent({ key: 'k', code: 'KeyK', shiftKey: false, ctrlKey: false, metaKey: false, altKey: false })).toBe(false);
+  });
+
+  it('detects editable targets for shortcut suppression', () => {
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+
+    expect(isEditableTarget({ target: input, composedPath: () => [input] })).toBe(true);
+
+    const textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+
+    expect(isEditableTarget({ target: textarea, composedPath: () => [textarea] })).toBe(true);
+
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+
+    expect(isEditableTarget({ target: div, composedPath: () => [div] })).toBe(false);
+  });
+
+  it('detects whether the page contains videos', () => {
+    expect(hasVideos()).toBe(false);
+
+    const video = document.createElement('video');
+    document.body.appendChild(video);
+
+    expect(hasVideos()).toBe(true);
   });
 });

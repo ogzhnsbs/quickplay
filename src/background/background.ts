@@ -49,17 +49,7 @@ chrome.runtime.onMessage.addListener(
           defaultSpeed: speed as ExtensionSettings["defaultSpeed"],
         };
         saveSettings(nextSettings)
-          .then(() => {
-            broadcastSettings(nextSettings);
-            chrome.tabs.query({}, (tabs) => {
-              tabs.forEach((tab) => {
-                if (tab.id) {
-                  chrome.tabs.sendMessage(tab.id, { type: "SETTINGS_UPDATED", payload: nextSettings }).catch(() => undefined);
-                }
-              });
-            });
-            sendResponse({ success: true });
-          })
+          .then(() => sendResponse({ success: true }))
           .catch(() => sendResponse({ success: false }));
       });
       return true;
