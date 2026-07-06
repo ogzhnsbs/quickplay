@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QuickPlay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Speed up any video with hover-activated controls. Click a speed or skip forward.",
   "permissions": ["storage"],
   "background": {

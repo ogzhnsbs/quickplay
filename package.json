@@ -1,6 +1,6 @@
 {
   "name": "chrome-video-speeder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chrome extension that speeds up all video content with hover-activated controls",
   "private": true,
   "type": "module",
